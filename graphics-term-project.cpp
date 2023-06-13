@@ -20,10 +20,11 @@ GLfloat cameraPosZ = 0.1f;
 void DrawOrbit(float a, float b) {
     glColor3f(0.5f, 0.5f, 0.5f);
     glBegin(GL_LINE_LOOP);
+    float x, y;
     for (int i = 0; i <= 360; i += 5) {
         float angle = i * 3.14159f / 180;
-        float x = a * cos(angle);
-        float y = b * sin(angle);
+        x = a * cos(angle);
+        y = b * sin(angle);
         glVertex3f(x, y, 0.0f);
     }
     glEnd();
@@ -35,9 +36,7 @@ void Display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // 
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
 
     DrawOrbit(0.3f, 0.3f);      // 수성의 공전 궤도
     DrawOrbit(0.38f, 0.38f);      // 금성의 공전 궤도
@@ -48,23 +47,18 @@ void Display() {
     DrawOrbit(0.9f, 0.9f);      // 천왕성의 공전 궤도
     DrawOrbit(1.0f, 1.0f);      // 해왕성의 공전 궤도
 
-        // 카메라 위치 설정
-    //cameraPosX = cameraDistance * sin(cameraAngleX);
-    //cameraPosY = cameraDistance * sin(cameraAngleY);
-    //cameraPosZ = cameraDistance * cos(cameraAngleX);
 
     // 태양 
     glColor3f(1.0, 0.3, 0.3);
-    glutWireSphere(0.2, 30, 30);  
-
-
+    glutWireSphere(0.2, 30, 30);
+    
     // 지구
     glPushMatrix();
     glRotatef((GLfloat)ear, 0.0, 1.0, 0.0);
     glTranslatef(0.45, 0.0, 0.0);
-    glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)Time, 0.0, 0.0, 1.0);
     glColor3f(0.2, 0.7, 0.8);
-    glutWireSphere(0.05, 20, 20); 
+    glutWireSphere(0.05, 20, 20);
 
     // 지구 궤도
     //DrawOrbit(0.0f, 0.5f);        // 행성을 중심으로 하는 궤도임
@@ -74,77 +68,75 @@ void Display() {
     glTranslatef(0.08, 0.0, 0.0);
     glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
     glColor3f(0.9, 0.8, 1.0);
-    glutWireSphere(0.012, 10, 10);  
+    glutWireSphere(0.012, 10, 10);
     glPopMatrix();
 
     // 수성 - 흰색
     glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)mer, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)mer, 0.0, 0.0, 1.0);     // Y축을 기준으로 회전
     glTranslatef(0.3f, 0.0, 0.0);
     glColor3f(1.0, 1.0, 1.0);
     glutWireSphere(0.02, 10, 8);
+    glPopMatrix();
 
     // 금성 - 금색
-    glLoadIdentity();
+    //glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)ven, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)ven, 0.0, 0.0, 1.0);
     glTranslatef(0.38, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
-    glutWireSphere(0.05, 10, 8); 
+    glutWireSphere(0.05, 10, 8);
+    glPopMatrix();
 
     // 화성
-    glLoadIdentity();
     glPushMatrix();
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)mar, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)mar, 0.0, 0.0, 1.0);
     glTranslatef(0.53, 0.0, 0.0);
     glColor3f(0.9, 0.1, 0.1);
     glutWireSphere(0.025, 10, 8);
     glPopMatrix();
 
     // 목성 - 노랑색 
-    glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)jup, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)jup, 0.0, 0.0, 1.0);
     glTranslatef(0.67, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
     glutWireSphere(0.1, 10, 8);
+    glPopMatrix();
 
     // 토성  
-    glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)sat, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)sat, 0.0, 0.0, 1.0);
     glTranslatef(0.8, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.08, 10, 8);
+    glPopMatrix();
+
 
     // 천왕성  
-    glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)ura, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)ura, 0.0, 0.0, 1.0);
     glTranslatef(0.9, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.07, 10, 8);
+    glPopMatrix();
 
     // 해왕성  
-    glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)nep, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)nep, 0.0, 0.0, 1.0);
     glTranslatef(1.0, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.06, 10, 8);
+    glPopMatrix();
 
     glPopMatrix();
     glPopMatrix();
@@ -230,7 +222,7 @@ void Menu(int value) {
 }
 
 void Timer(int Value) {
-    mer = fmodf(mer + 0.75, 360);      // 수성의 공전 속도
+    mer = fmodf(mer + 1, 360);      // 수성의 공전 속도
     ven = fmodf(ven + 1.8, 360);      // 금성의 공전 속도 
     ear = fmodf(ear + 3, 360);      // 지구의 공전 속도
     mar = fmodf(mar + 5.7, 360);      // 화성의 공전 속도 
