@@ -5,7 +5,7 @@
 #include <stdio.h>
 using namespace std;
 
-static int Day = 0, Day1 = 0, Day2 = 0, Time = 0, mer = 0, ven = 0, ear = 0, mar = 0;
+static int Time = 0, mer = 0, ven = 0, ear = 0, mar = 0, jup = 0, sat = 0, ura = 0, nep = 0;
 static GLfloat cameraAngleX = 0.0f;
 static GLfloat cameraAngleY = 0.0f;
 static GLfloat cameraAngleZ = 0.0f;
@@ -108,6 +108,44 @@ void Display() {
     glutWireSphere(0.025, 10, 8);
     glPopMatrix();
 
+    // 목성 - 노랑색 
+    glLoadIdentity();
+    glPushMatrix();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)jup, 0.0, 1.0, 0.0);
+    glTranslatef(0.67, 0.0, 0.0);
+    glColor3f(0.9, 0.8, 0.1);
+    glutWireSphere(0.1, 10, 8);
+
+    // 토성  
+    glLoadIdentity();
+    glPushMatrix();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)sat, 0.0, 1.0, 0.0);
+    glTranslatef(0.8, 0.0, 0.0);
+    glColor3f(0.7, 0.8, 0.1);
+    glutWireSphere(0.08, 10, 8);
+
+    // 천왕성  
+    glLoadIdentity();
+    glPushMatrix();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)ura, 0.0, 1.0, 0.0);
+    glTranslatef(0.9, 0.0, 0.0);
+    glColor3f(0.7, 0.8, 0.1);
+    glutWireSphere(0.07, 10, 8);
+
+    // 해왕성  
+    glLoadIdentity();
+    glPushMatrix();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)nep, 0.0, 1.0, 0.0);
+    glTranslatef(1.0, 0.0, 0.0);
+    glColor3f(0.7, 0.8, 0.1);
+    glutWireSphere(0.06, 10, 8);
+
     glPopMatrix();
     glPopMatrix();
     glLoadIdentity();
@@ -191,13 +229,16 @@ void Menu(int value) {
     glutPostRedisplay();
 }
 
-// 현재는 모든 행성의 공전 속도가 같게 출력되도록 설정함. 추후 수정
 void Timer(int Value) {
-    ven = (ven + 3) % 360;
-    ear = (ear + 2) % 360;
-    mar = (mar + 1) % 360;
-    Time = (Time + 3) % 360;
-    mer = (mer + 5) % 360;
+    mer = fmodf(mer + 0.75, 360);      // 수성의 공전 속도
+    ven = fmodf(ven + 1.8, 360);      // 금성의 공전 속도 
+    ear = fmodf(ear + 3, 360);      // 지구의 공전 속도
+    mar = fmodf(mar + 5.7, 360);      // 화성의 공전 속도 
+    jup = fmodf(jup + 2.5, 360);      // 목성의 공전 속도 
+    sat = fmodf(sat + 2, 360);      // 토성의 공전 속도 
+    ura = fmodf(ura + 1.5, 360);      // 천왕성의 공전 속도 
+    nep = fmodf(nep + 1.1, 360);      // 해왕성의 공전 속도 
+    Time = (Time + 3) % 360;        // 자전 속도
     glutPostRedisplay();
     glutTimerFunc(40, Timer, 1);
 }
@@ -207,7 +248,7 @@ int main(int argc, char** argv) {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(1000, 800);
+    glutInitWindowSize(800, 800);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("20214033 임채민 - 컴퓨터그래픽스 텀프로젝트");
 
