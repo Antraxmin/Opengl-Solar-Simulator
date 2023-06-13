@@ -5,7 +5,7 @@
 #include <stdio.h>
 using namespace std;
 
-static int Day = 0, Day1 = 0, Day2 = 0, Time = 0, mer = 0;
+static int Day = 0, Day1 = 0, Day2 = 0, Time = 0, mer = 0, ven = 0, ear = 0, mar = 0;
 static GLfloat cameraAngleX = 0.0f;
 static GLfloat cameraAngleY = 0.0f;
 static GLfloat cameraAngleZ = 0.0f;
@@ -17,8 +17,6 @@ GLfloat cameraPosY = 0.1f;
 GLfloat cameraPosZ = 0.1f;
 
 // 공전 궤도 그리기
-
-
 void DrawOrbit(float a, float b) {
     glColor3f(0.5f, 0.5f, 0.5f);
     glBegin(GL_LINE_LOOP);
@@ -37,10 +35,6 @@ void Display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // 카메라 위치 설정
-    //GLfloat cameraPosX = cameraDistance * sin(cameraAngleX);
-    //GLfloat cameraPosY = cameraDistance * sin(cameraAngleY);
-    //GLfloat cameraPosZ = cameraDistance * cos(cameraAngleX);
     // 
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
@@ -54,48 +48,52 @@ void Display() {
     DrawOrbit(0.9f, 0.9f);      // 천왕성의 공전 궤도
     DrawOrbit(1.0f, 1.0f);      // 해왕성의 공전 궤도
 
+        // 카메라 위치 설정
+    //cameraPosX = cameraDistance * sin(cameraAngleX);
+    //cameraPosY = cameraDistance * sin(cameraAngleY);
+    //cameraPosZ = cameraDistance * cos(cameraAngleX);
+
     // 태양 
     glColor3f(1.0, 0.3, 0.3);
     glutWireSphere(0.2, 30, 30);  
 
+
     // 지구
     glPushMatrix();
-    glRotatef((GLfloat)Day, 0.0, 1.0, 0.0);
-    glTranslatef(0.8, 0.0, 0.0);
+    glRotatef((GLfloat)ear, 0.0, 1.0, 0.0);
+    glTranslatef(0.45, 0.0, 0.0);
     glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
     glColor3f(0.2, 0.7, 0.8);
-    glutWireSphere(0.1, 20, 20); 
+    glutWireSphere(0.05, 20, 20); 
 
     // 지구 궤도
-    // 태양을 중심으로 하는 타원
-    DrawOrbit(0.0f, 0.5f);
-
+    //DrawOrbit(0.0f, 0.5f);        // 행성을 중심으로 하는 궤도임
 
     // 달
     glPushMatrix();
-    glTranslatef(0.2, 0.0, 0.0);
+    glTranslatef(0.08, 0.0, 0.0);
     glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
     glColor3f(0.9, 0.8, 1.0);
-    glutWireSphere(0.04, 10, 10);  
+    glutWireSphere(0.012, 10, 10);  
     glPopMatrix();
 
     // 수성 - 흰색
     glLoadIdentity();
     glPushMatrix();
-    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.05, 0.0);
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     glRotatef((GLfloat)mer, 0.0, 1.0, 0.0);
-    glTranslatef(0.4, 0.0, 0.0);
+    glTranslatef(0.3f, 0.0, 0.0);
     glColor3f(1.0, 1.0, 1.0);
-    glutWireSphere(0.03, 10, 8);
+    glutWireSphere(0.02, 10, 8);
 
     // 금성 - 금색
     glLoadIdentity();
     glPushMatrix();
-    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.03, 0.0);
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    glRotatef((GLfloat)Day1, 0.0, 1.0, 0.0);
-    glTranslatef(0.6, 0.0, 0.0);
+    glRotatef((GLfloat)ven, 0.0, 1.0, 0.0);
+    glTranslatef(0.38, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
     glutWireSphere(0.05, 10, 8); 
 
@@ -103,11 +101,11 @@ void Display() {
     glLoadIdentity();
     glPushMatrix();
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.01, 0.0);
-    glRotatef((GLfloat)Day2, 0.0, 1.0, 0.0);
-    glTranslatef(1.1, 0.0, 0.0);
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)mar, 0.0, 1.0, 0.0);
+    glTranslatef(0.53, 0.0, 0.0);
     glColor3f(0.9, 0.1, 0.1);
-    glutWireSphere(0.05, 10, 8);
+    glutWireSphere(0.025, 10, 8);
     glPopMatrix();
 
     glPopMatrix();
@@ -153,10 +151,10 @@ void SpecialFunc(int key, int x, int y) {
             -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
         break;
     case GLUT_KEY_LEFT:  // 왼쪽 화살표 키를 눌렀을 때
-        cameraPosZ -= 0.1f;
+        cameraPosY -= 0.1f;
         break;
     case GLUT_KEY_RIGHT:  // 오른쪽 화살표 키를 눌렀을 때
-        cameraPosZ += 0.1f;
+        cameraPosY += 0.1f;
         break;
     }
     glutPostRedisplay();
@@ -195,9 +193,9 @@ void Menu(int value) {
 
 // 현재는 모든 행성의 공전 속도가 같게 출력되도록 설정함. 추후 수정
 void Timer(int Value) {
-    Day = (Day + 3) % 360;
-    Day1 = (Day1 + 4) % 360;
-    Day2 = (Day2 + 3) % 360;
+    ven = (ven + 3) % 360;
+    ear = (ear + 2) % 360;
+    mar = (mar + 1) % 360;
     Time = (Time + 3) % 360;
     mer = (mer + 5) % 360;
     glutPostRedisplay();
