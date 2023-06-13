@@ -45,14 +45,14 @@ void Display() {
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
 
-    DrawOrbit(0.3f, 0.3f);
-    DrawOrbit(0.4f, 0.4f);
-    DrawOrbit(0.5f, 0.5f);
-    DrawOrbit(0.6f, 0.6f);
-    DrawOrbit(0.7f, 0.7f);
-    DrawOrbit(0.8f, 0.8f);
-    DrawOrbit(0.9f, 0.9f);
-    DrawOrbit(1.0f, 1.0f);
+    DrawOrbit(0.3f, 0.3f);      // 수성의 공전 궤도
+    DrawOrbit(0.38f, 0.38f);      // 금성의 공전 궤도
+    DrawOrbit(0.45f, 0.45f);      // 지구의 공전 궤도
+    DrawOrbit(0.53f, 0.53f);      // 화성의 공전 궤도
+    DrawOrbit(0.67f, 0.67f);      // 목성의 공전 궤도
+    DrawOrbit(0.8f, 0.8f);      // 토성의 공전 궤도
+    DrawOrbit(0.9f, 0.9f);      // 천왕성의 공전 궤도
+    DrawOrbit(1.0f, 1.0f);      // 해왕성의 공전 궤도
 
     // 태양 
     glColor3f(1.0, 0.3, 0.3);
