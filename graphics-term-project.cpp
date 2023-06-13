@@ -5,12 +5,31 @@
 #include <stdio.h>
 using namespace std;
 
-static int Day = 0, Day1 = 0, Day2 = 0, Time = 0;
+static int Day = 0, Day1 = 0, Day2 = 0, Time = 0, mer = 0;
 static GLfloat cameraAngleX = 0.0f;
 static GLfloat cameraAngleY = 0.0f;
 static GLfloat cameraAngleZ = 0.0f;
 static GLfloat cameraDistance = 0.1f;
 GLfloat zoomFactor = 0.9f;  // 확대/축소 비율 조절
+
+GLfloat cameraPosX = 0.1f;
+GLfloat cameraPosY = 0.1f;
+GLfloat cameraPosZ = 0.1f;
+
+// 공전 궤도 그리기
+
+
+void DrawOrbit(float a, float b) {
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i <= 360; i += 5) {
+        float angle = i * 3.14159f / 180;
+        float x = a * cos(angle);
+        float y = b * sin(angle);
+        glVertex3f(x, y, 0.0f);
+    }
+    glEnd();
+}
 
 void Display() {
     glEnable(GL_DEPTH_TEST);        // 은면제거
@@ -19,11 +38,21 @@ void Display() {
     glLoadIdentity();
 
     // 카메라 위치 설정
-    GLfloat cameraPosX = cameraDistance * sin(cameraAngleX);
-    GLfloat cameraPosY = cameraDistance * sin(cameraAngleY);
-    GLfloat cameraPosZ = cameraDistance * cos(cameraAngleX);
+    //GLfloat cameraPosX = cameraDistance * sin(cameraAngleX);
+    //GLfloat cameraPosY = cameraDistance * sin(cameraAngleY);
+    //GLfloat cameraPosZ = cameraDistance * cos(cameraAngleX);
+    // 
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+
+    DrawOrbit(0.3f, 0.3f);
+    DrawOrbit(0.4f, 0.4f);
+    DrawOrbit(0.5f, 0.5f);
+    DrawOrbit(0.6f, 0.6f);
+    DrawOrbit(0.7f, 0.7f);
+    DrawOrbit(0.8f, 0.8f);
+    DrawOrbit(0.9f, 0.9f);
+    DrawOrbit(1.0f, 1.0f);
 
     // 태양 
     glColor3f(1.0, 0.3, 0.3);
@@ -32,10 +61,15 @@ void Display() {
     // 지구
     glPushMatrix();
     glRotatef((GLfloat)Day, 0.0, 1.0, 0.0);
-    glTranslatef(0.7, 0.0, 0.0);
+    glTranslatef(0.8, 0.0, 0.0);
     glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
     glColor3f(0.2, 0.7, 0.8);
     glutWireSphere(0.1, 20, 20); 
+
+    // 지구 궤도
+    // 태양을 중심으로 하는 타원
+    DrawOrbit(0.0f, 0.5f);
+
 
     // 달
     glPushMatrix();
@@ -45,13 +79,23 @@ void Display() {
     glutWireSphere(0.04, 10, 10);  
     glPopMatrix();
 
-    // 금성
+    // 수성 - 흰색
+    glLoadIdentity();
+    glPushMatrix();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.05, 0.0);
+    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    glRotatef((GLfloat)mer, 0.0, 1.0, 0.0);
+    glTranslatef(0.4, 0.0, 0.0);
+    glColor3f(1.0, 1.0, 1.0);
+    glutWireSphere(0.03, 10, 8);
+
+    // 금성 - 금색
     glLoadIdentity();
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.03, 0.0);
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     glRotatef((GLfloat)Day1, 0.0, 1.0, 0.0);
-    glTranslatef(0.5, 0.0, 0.0);
+    glTranslatef(0.6, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
     glutWireSphere(0.05, 10, 8); 
 
@@ -61,7 +105,7 @@ void Display() {
     //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.01, 0.0);
     glRotatef((GLfloat)Day2, 0.0, 1.0, 0.0);
-    glTranslatef(0.7, 0.0, 0.0);
+    glTranslatef(1.1, 0.0, 0.0);
     glColor3f(0.9, 0.1, 0.1);
     glutWireSphere(0.05, 10, 8);
     glPopMatrix();
@@ -77,8 +121,8 @@ void Reshape(int NewWidth, int NewHeight) {
     GLfloat AspectRatio = (GLfloat)NewWidth / (GLfloat)NewHeight;
     printf("%lf", AspectRatio);
     gluPerspective(60.0f, AspectRatio, 0.1f, 10.0f);
-    GLfloat WidthFactor = (GLfloat)NewWidth / (GLfloat)500;
-    GLfloat HeightFactor = (GLfloat)NewHeight / (GLfloat)500;
+    GLfloat WidthFactor = (GLfloat)NewWidth / (GLfloat)800;
+    GLfloat HeightFactor = (GLfloat)NewHeight / (GLfloat)800;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-1.0 * WidthFactor, 1.0 * WidthFactor,
@@ -109,10 +153,10 @@ void SpecialFunc(int key, int x, int y) {
             -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
         break;
     case GLUT_KEY_LEFT:  // 왼쪽 화살표 키를 눌렀을 때
-        cameraAngleX -= 0.1f;
+        cameraPosZ -= 0.1f;
         break;
     case GLUT_KEY_RIGHT:  // 오른쪽 화살표 키를 눌렀을 때
-        cameraAngleX += 0.1f;
+        cameraPosZ += 0.1f;
         break;
     }
     glutPostRedisplay();
@@ -152,9 +196,10 @@ void Menu(int value) {
 // 현재는 모든 행성의 공전 속도가 같게 출력되도록 설정함. 추후 수정
 void Timer(int Value) {
     Day = (Day + 3) % 360;
-    Day1 = (Day1 + 3) % 360;
+    Day1 = (Day1 + 4) % 360;
     Day2 = (Day2 + 3) % 360;
     Time = (Time + 3) % 360;
+    mer = (mer + 5) % 360;
     glutPostRedisplay();
     glutTimerFunc(40, Timer, 1);
 }
@@ -164,7 +209,7 @@ int main(int argc, char** argv) {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(500, 500);
+    glutInitWindowSize(1000, 800);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("20214033 임채민 - 컴퓨터그래픽스 텀프로젝트");
 
