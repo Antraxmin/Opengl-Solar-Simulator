@@ -25,6 +25,10 @@ GLfloat cameraDistance = 0.1f;  // 카메라의 초기 거리
 GLfloat cameraAngle = 0.0f;  // 카메라의 초기 각도
 GLfloat cameraHeight = 1.5f;  // 카메라의 초기 높이
 
+GLfloat cameraPosX = 0.1f;
+GLfloat cameraPosY = 0.1f;
+GLfloat cameraPosZ = 0.1f;
+
 GLfloat globalSpeed = 1.0f;  // 전체 속도 비율
 
 // 난수 생성기 초기화
@@ -33,7 +37,7 @@ std::mt19937 gen(rd());
 std::uniform_real_distribution<GLfloat> dis(0.0f, 1.0f);
 
 void initializePlanets() {
-    Planet sun = { "Sun", 0.2f, 0.0f, 0.0f, 0.0f, {1.0f, 1.0f, 0.0f}, true};          // 태양
+    Planet sun = { "Sun", 0.2f, 0.0f, 0.0f, 0.0f, {1.0f, 1.0f, 0.0f}, true };          // 태양
     Planet mercury = { "Mercury", 0.02f, 0.3f, 0.0f, 0.25f, {0.7f, 0.7f, 0.7f}, true };    // 수성
     Planet venus = { "Venus", 0.05f, 0.35f, 0.0f, 0.6f, {0.8f, 0.5f, 0.2f}, true };      // 금성
     Planet earth = { "Earth", 0.05f, 0.4f, 0.0f, 1.0f, {0.2f, 0.4f, 0.8f}, true };       // 지구
@@ -108,25 +112,11 @@ void drawScene() {
     glLoadIdentity();
 
     // 카메라 위치 설정
-    gluLookAt(0.1f, 0.1f, cameraDistance, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
     glRotatef(cameraAngle, 0.0f, 1.0f, 0.0f);
 
-    // 시점 변경
-    if (currentView == 1) {
-        gluLookAt(0.1f, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 1.5f, 0.0f);  // 위 시점
-    }
-    else if (currentView == 2) {
-        gluLookAt(0.0f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);  // 옆 시점
-    }
-    else if (currentView == 3) {
-        gluLookAt(0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);  // 앞 시점
-    }
-    else if (currentView == 4) {
-        GLfloat randomX = dis(gen) - 0.5f;
-        GLfloat randomY = dis(gen) - 0.5f;
-        GLfloat randomZ = dis(gen) - 0.5f;
-        gluLookAt(randomX, randomY, randomZ, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);  // 무작위 시점
-    }
+    // 시점 변경 
+    
 
     // 행성 그리기
     for (const auto& planet : planets) {
@@ -207,7 +197,7 @@ void mouse(int button, int state, int x, int y) {
 
             // 클릭된 좌표와 행성의 위치와의 거리 계산 
             GLfloat distance = sqrt(pow(clickX - planetX, 2) + pow(clickY - planetY, 2));
-            
+
             // 마우스 클릭된 위치와 가장 가까운 행성 찾기
             if (distance < minDistance) {
                 minDistance = distance;
@@ -252,8 +242,33 @@ void specialKeyboard(int key, int x, int y) {
 }
 
 void menuSelect(int choice) {
-    currentView = choice;
+    switch (choice) {
+    case 1:     // 위 시점
+        cameraPosX = 0.1f;
+        cameraPosY = 0.1f;
+        cameraPosZ = 0.1f;
+        break;
+    case 2:     // 옆 시점
+        cameraPosX = 0.0f;
+        cameraPosY = 0.1f;
+        cameraPosZ = 0.1f;
+        break;
+    case 3:     // 앞 시점
+        cameraPosX = 0.0f;
+        cameraPosY = 0.1f;
+        cameraPosZ = 0.0f;
+        break;
+    case 4:     // 무작위 시점
+        cameraPosX = (GLfloat)rand() / RAND_MAX * 0.1;
+        cameraPosY = (GLfloat)rand() / RAND_MAX * 0.1;
+        cameraPosZ = (GLfloat)rand() / RAND_MAX * 0.1;
+        break;
+    }
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f); 
     glutPostRedisplay();
+
 }
 
 void createMenu() {
