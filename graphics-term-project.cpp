@@ -14,8 +14,10 @@ struct Planet {
     GLfloat rotation;       // 공전 각도 변수)
     GLfloat speed;          // 공전 속도
     GLfloat color[3];       // 색상 -RGB
-    bool isRotating;
+    bool hasMoon;           // 해당 행성이 달을 가지고 있는지 여부
 };
+
+Planet selectedPlanet;
 
 std::vector<Planet> planets;  // Planet 구조체를 담는 벡터
 bool isRotationPaused = false;  // 회전 일시 정지 상태를 나타내는 변수
@@ -37,19 +39,17 @@ std::mt19937 gen(rd());
 std::uniform_real_distribution<GLfloat> dis(0.0f, 1.0f);
 
 void initializePlanets() {
-    Planet sun = { "Sun", 0.2f, 0.0f, 0.0f, 0.0f, {1.0f, 1.0f, 0.0f}, true };          // 태양
-    Planet mercury = { "Mercury", 0.02f, 0.3f, 0.0f, 0.25f, {0.7f, 0.7f, 0.7f}, true };    // 수성
-    Planet venus = { "Venus", 0.05f, 0.35f, 0.0f, 0.6f, {0.8f, 0.5f, 0.2f}, true };      // 금성
-    Planet earth = { "Earth", 0.05f, 0.4f, 0.0f, 1.0f, {0.2f, 0.4f, 0.8f}, true };       // 지구
-    Planet moon = { "Moon", 0.012f, 0.45f, 0.0f, 0.07f, {0.7f, 0.7f, 0.7f}, true };      // 달
-    Planet mars = { "Mars", 0.025f, 0.6f, 0.0f, 1.9f, {0.8f, 0.3f, 0.1f}, true };        // 화성
-    Planet jupiter = { "Jupiter", 0.10f, 0.7f, 0.0f, 0.5f, {0.8f, 0.3f, 0.1f}, true };      // 목성
-    Planet saturnus = { "Saturnus", 0.08f, 0.8f, 0.0f, 0.4f, {0.8f, 0.3f, 0.1f}, true };      // 토성
-    Planet uranus = { "Uranus", 0.06f, 0.9f, 0.0f, 0.3f, {0.8f, 0.3f, 0.1f}, true };        // 천왕성
-    Planet neptunus = { "Neptunus", 0.05f, 1.0f, 0.0f, 0.2f, {0.0f, 0.4f, 0.9f}, true };      // 해왕성
-
+    Planet sun = { "Sun", 0.2f, 0.0f, 0.0f, 0.0f, {1.0f, 0.0f, 0.0f}, false };          // 태양
+    Planet mercury = { "Mercury", 0.02f, 0.3f, 0.0f, 0.25f, {0.7f, 0.7f, 0.7f},  false };    // 수성
+    Planet venus = { "Venus", 0.05f, 0.35f, 0.0f, 0.6f, {0.93f, 0.86f, 0.5f},  false };      // 금성
+    Planet earth = { "Earth", 0.05f, 0.4f, 0.0f, 1.0f, {0.27f, 0.5f, 0.7f}, true };       // 지구
+    Planet mars = { "Mars", 0.025f, 0.6f, 0.0f, 1.9f, {0.72f, 0.52f, 0.04f},  false };        // 화성
+    Planet jupiter = { "Jupiter", 0.10f, 0.7f, 0.0f, 0.5f, {0.87f, 0.72f, 0.52f},  false };      // 목성
+    Planet saturnus = { "Saturnus", 0.08f, 0.8f, 0.0f, 0.4f, {0.96f, 0.96f, 0.86f},  false };      // 토성
+    Planet uranus = { "Uranus", 0.06f, 0.9f, 0.0f, 0.3f, {0.67f, 0.84f, 0.9f},  false };        // 천왕성
+    Planet neptunus = { "Neptunus", 0.05f, 1.0f, 0.0f, 0.2f, {0.1f, 0.5f, 1.0f},  false };      // 해왕성
+    
     planets.push_back(sun);
-    planets.push_back(moon);
     planets.push_back(mercury);
     planets.push_back(venus);
     planets.push_back(earth);
@@ -58,6 +58,8 @@ void initializePlanets() {
     planets.push_back(saturnus);
     planets.push_back(uranus);
     planets.push_back(neptunus);
+
+
 }
 
 
@@ -81,19 +83,34 @@ void drawOrbit(GLfloat orbitRadius, GLfloat lineWidth) {
 }
 
 void drawPlanet(Planet planet) {
-    glColor3fv(planet.color);
+    // 달 그리기
+    if (planet.hasMoon) {
+        glPushMatrix();
+        glRotatef(-planet.rotation, 0.0f, 1.0f, 0.0f);
+        glTranslatef(0.05, 0.0f, 0.0f);
+
+         // 달 그리기
+        glColor3f(1.0f, 1.0f, 1.0f);  // 달의 색상 설정 (흰색)
+        glRotatef(-3.0, 0.0f, 1.0f, 0.0f);
+        glTranslatef(0.4f, 0.0f, 0.0f);
+        glutWireSphere(0.02f, 10, 10);  // 달을 작게 그리기
+        glPopMatrix();
+    }
+    glColor3f(planet.color[0], planet.color[1], planet.color[2]);
     glPushMatrix();
-    glRotatef(planet.rotation, 0.0f, 1.0f, 0.0f);
+    glRotatef(-planet.rotation, 0.0f, 1.0f, 0.0f);
     glTranslatef(planet.distance, 0.0f, 0.0f);
     glutWireSphere(planet.radius, 20, 20);
     glPopMatrix();
+
+    
 
     // 궤도 그리기
     const GLfloat orbitRadius = planet.distance;
     const GLfloat orbitLineWidth = 0.002f;
     const int numSegments = 360;
 
-    glColor3fv(planet.color);
+    glColor3f(0.5f, 0.5f, 0.5f);
     glLineWidth(orbitLineWidth);
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < numSegments; ++i) {
@@ -105,9 +122,9 @@ void drawPlanet(Planet planet) {
     glEnd();
 }
 
-void drawScene() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void Display() {
+    glEnable(GL_DEPTH_TEST);        // 은면제거
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -115,16 +132,14 @@ void drawScene() {
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
     glRotatef(cameraAngle, 0.0f, 1.0f, 0.0f);
 
-    // 시점 변경 
-    
-
     // 행성 그리기
-    for (const auto& planet : planets) {
-        drawPlanet(planet);
+    for (size_t i = 0; i < planets.size(); i++) {
+        drawPlanet(planets[i]);
     }
 
     glutSwapBuffers();
 }
+
 
 void updateScene(int value) {
     if (!isRotationPaused) {
@@ -164,58 +179,6 @@ void keyboard(unsigned char key, int x, int y) {
     }
     glutPostRedisplay();
 }
-
-//void mouse(int button, int state, int x, int y) {
-//    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-//        // 행성 색상 무작위 변경
-//        for (auto& planet : planets) {
-//            planet.color[0] = dis(gen);
-//            planet.color[1] = dis(gen);
-//            planet.color[2] = dis(gen);
-//        }
-//    }
-//}
-
-void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        GLfloat minDistance = std::numeric_limits<GLfloat>::max();
-        int closePlanetIndex = -1;
-
-        // 마우스 클릭된 좌표 구하기 
-        GLfloat clickX = x * 2.0f / windowWidth - 1.0f;
-        GLfloat clickY = 1.0f - y * 2.0f / windowHeight;
-
-        // 행성의 현재 위치 계산
-        for (int i = 0; i < planets.size(); i++) {
-            if (i == planets.size()) return;
-            // 행성의 현재 위치 계산
-            GLfloat planetX = planets[i].distance * cosf(planets[i].rotation * PI / 180.0f);
-            printf("%lf", planetX);
-            GLfloat planetY = 0.1 * sinf(planets[i].rotation * PI / 180.0f);
-            GLfloat planetZ = planets[i].distance * cosf(planets[i].rotation * PI / 180.0f);
-            printf("%lf", planetZ);
-
-            // 클릭된 좌표와 행성의 위치와의 거리 계산 
-            GLfloat distance = sqrt(pow(clickX - planetX, 2) + pow(clickY - planetY, 2));
-
-            // 마우스 클릭된 위치와 가장 가까운 행성 찾기
-            if (distance < minDistance) {
-                minDistance = distance;
-                closePlanetIndex = i;
-            }
-        }
-        if (closePlanetIndex != -1) {
-            // 가장 가까운 행성의 이름 출력
-            printf("가장 가까운 행성: %s\n", planets[closePlanetIndex].name.c_str());
-
-            // 가장 가까운 행성의 색상 변경
-            planets[closePlanetIndex].color[0] = static_cast<GLfloat>(rand()) / RAND_MAX;  // R
-            planets[closePlanetIndex].color[1] = static_cast<GLfloat>(rand()) / RAND_MAX;  // G
-            planets[closePlanetIndex].color[2] = static_cast<GLfloat>(rand()) / RAND_MAX;  // B
-        }
-    }
-}
-
 
 void specialKeyboard(int key, int x, int y) {
     switch (key) {
@@ -291,11 +254,11 @@ int main(int argc, char** argv) {
 
     initializePlanets();
 
-    glutDisplayFunc(drawScene);
+    glutDisplayFunc(Display);
     glutReshapeFunc(reshape);
     glutSpecialFunc(specialKeyboard);
     glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouse);
+    //glutMouseFunc(mouse);
     createMenu();
 
     glutTimerFunc(16, updateScene, 0);  // 60 FPS
