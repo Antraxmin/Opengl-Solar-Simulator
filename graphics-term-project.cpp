@@ -58,7 +58,18 @@ void Display() {
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ);
     glScalef(zoom, zoom, zoom);
     glRotatef(cameraRotate, cameraRotateX, cameraRotateY, cameraRotateZ);
+  
+    // 태양 
+    glPushMatrix();
+    glColor3f(1.0, 0.3, 0.3);
+    glutWireSphere(0.2, 20, 20);
+    glPushMatrix();
+    //glPopMatrix();
+    
 
+    //glPushMatrix();
+
+    //glLoadIdentity();
     DrawOrbit(0.3f, 0.3f);      // 수성의 공전 궤도
     DrawOrbit(0.38f, 0.38f);      // 금성의 공전 궤도
     DrawOrbit(0.45f, 0.45f);      // 지구의 공전 궤도
@@ -67,19 +78,14 @@ void Display() {
     DrawOrbit(0.8f, 0.8f);      // 토성의 공전 궤도
     DrawOrbit(0.9f, 0.9f);      // 천왕성의 공전 궤도
     DrawOrbit(1.0f, 1.0f);      // 해왕성의 공전 궤도
+    //glPopMatrix();
 
-
-    // 태양 
-    glPushMatrix();
-    glColor3f(1.0, 0.3, 0.3);
-    glutWireSphere(0.2, 20, 20);
-    glPopMatrix();
+   
     
     // 지구
     glPushMatrix();
-    glRotatef((GLfloat)ear, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)ear, 0.0, 0.0, 1.0);
     glTranslatef(0.45, 0.0, 0.0);
-    glRotatef((GLfloat)Time, 0.0, 0.0, 1.0);
     glColor3f(0.2, 0.7, 0.8);
     glutWireSphere(0.05, 20, 20);
     glPopMatrix();
@@ -90,22 +96,26 @@ void Display() {
     // 달
     glPushMatrix();
     glTranslatef(0.08, 0.0, 0.0);
-    glRotatef((GLfloat)Time, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)Time, 0.0, 0.0, 1.0);
     glColor3f(0.9, 0.8, 1.0);
     glutWireSphere(0.012, 10, 10);
     glPopMatrix();
 
+ 
     // 수성 - 흰색
+    //glLoadIdentity();
     glPushMatrix();
-    glRotatef((GLfloat)mer, 0.0, 1.0, 0.0);     // Y축을 기준으로 회전
+    glRotatef((GLfloat)mer, 0.0, 0.0, 1.0);     // Y축을 기준으로 회전
     glTranslatef(0.3f, 0.0, 0.0);
     glColor3f(1.0, 1.0, 1.0);
     glutWireSphere(0.02, 10, 8);
     glPopMatrix();
 
+    
+
     // 금성 
     glPushMatrix();
-    glRotatef((GLfloat)ven, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)ven, 0.0, 0.0, 1.0);
     glTranslatef(0.38, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
     glutWireSphere(0.05, 10, 8);
@@ -113,15 +123,16 @@ void Display() {
 
     // 화성
     glPushMatrix();
-    glRotatef((GLfloat)mar, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)mar, 0.0, 0.0, 1.0);
     glTranslatef(0.53, 0.0, 0.0);
     glColor3f(0.9, 0.1, 0.1);
     glutWireSphere(0.025, 10, 8);
     glPopMatrix();
 
+
     // 목성 - 노랑색 
     glPushMatrix();
-    glRotatef((GLfloat)jup, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)jup, 0.0, 0.0, 1.0);
     glTranslatef(0.67, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
     glutWireSphere(0.1, 10, 8);
@@ -129,26 +140,30 @@ void Display() {
 
     // 토성  
     glPushMatrix();
-    glRotatef((GLfloat)sat, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)sat, 0.0, 0.0, 1.0);
     glTranslatef(0.8, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.08, 10, 8);
     glPopMatrix();
 
+
     // 천왕성  
     glPushMatrix();
-    glRotatef((GLfloat)ura, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)ura, 0.0, 0.0, 1.0);
     glTranslatef(0.9, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.07, 10, 8);
     glPopMatrix();
+ 
 
     // 해왕성  
     glPushMatrix();
-    glRotatef((GLfloat)nep, 0.0, 1.0, 0.0);
+    glRotatef((GLfloat)nep, 0.0, 0.0, 1.0);
     glTranslatef(1.0, 0.0, 0.0);
     glColor3f(0.7, 0.8, 0.1);
     glutWireSphere(0.06, 10, 8);
+    glPopMatrix();
+
     glPopMatrix();
 
     glutSwapBuffers();
@@ -209,7 +224,7 @@ void Menu(int value) {
         cameraRotateY = 1.0;
         cameraRotateZ = -1.0;
         break;
-    case 2:  // 위 시점
+    case 3:  // 옆 시점
         zoom = 1;
         cameraRotate = 0.0f;
         cameraPosX = 0.0;
@@ -241,7 +256,7 @@ void Menu(int value) {
         cameraRotateY = 1.0;
         cameraRotateZ = 0.0;
         break;
-    case 3:  // 옆 시점
+    case 2:  // 위 시점
         zoom = 1;
         cameraRotate = 0.0f;
         cameraPosX = 0.1;
