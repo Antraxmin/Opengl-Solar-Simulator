@@ -1,4 +1,6 @@
-﻿#include <GL/glut.h>
+﻿
+
+#include <GL/glut.h>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
@@ -33,6 +35,8 @@ GLfloat cameraRotate = 0.0f;
 GLfloat cameraRotateX = 0.0f;
 GLfloat cameraRotateY = 0.0f;
 GLfloat cameraRotateZ = 0.0f;
+
+bool isStopped = false;
 
 
 // 공전 궤도 그리기
@@ -177,6 +181,12 @@ void Reshape(int width, int height) {
     glLoadIdentity();
 }
 
+void KeyBoardFunc(unsigned char key, int x, int y) {
+    if (key == 32) {
+        isStopped = !isStopped;
+    }
+}
+
 
 void SpecialFunc(int key, int x, int y) {
     switch (key) {
@@ -196,10 +206,10 @@ void SpecialFunc(int key, int x, int y) {
             -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
         break;
     case GLUT_KEY_LEFT:  // 왼쪽 화살표 키를 눌렀을 때
-        cameraPosY += 0.5f;
+        cameraPosX -= 0.1f;
         break;
     case GLUT_KEY_RIGHT:  // 오른쪽 화살표 키를 눌렀을 때
-        cameraPosY -= 0.1f;
+        cameraPosX += 0.1f;
         break;
     }
     glutPostRedisplay();
@@ -224,11 +234,11 @@ void Menu(int value) {
         cameraRotateY = 1.0;
         cameraRotateZ = -1.0;
         break;
-    case 3:  // 옆 시점
+    case 4:  // 옆 시점
         zoom = 1;
         cameraRotate = 0.0f;
-        cameraPosX = 0.0;
-        cameraPosY = 0.1;
+        cameraPosX = 0.1;
+        cameraPosY = 0.0;
         cameraPosZ = 0.0;
         cameraCenterX = 0.0;
         cameraCenterY = 0.0;
@@ -236,16 +246,16 @@ void Menu(int value) {
         cameraUpX = 0.0;
         cameraUpY = 0.0;
         cameraUpZ = -1.0;
-        cameraRotateX = 1.0;
+        cameraRotateX = -1.0;
         cameraRotateY = 0.0;
         cameraRotateZ = 0.0;
         break;
-    case 4:  // 앞 시점
+    case 2:  // 앞 시점
         zoom = 1;
         cameraRotate = 0.0f;
         cameraPosX = 0.0;
         cameraPosY = 0.1;
-        cameraPosZ = -0.1;
+        cameraPosZ = 0.1;
         cameraCenterX = 0.0;
         cameraCenterY = 0.0;
         cameraCenterZ = 0.0;
@@ -256,26 +266,33 @@ void Menu(int value) {
         cameraRotateY = 1.0;
         cameraRotateZ = 0.0;
         break;
-    case 2:  // 위 시점
+    case 3:  // 위 시점
         zoom = 1;
         cameraRotate = 0.0f;
-        cameraPosX = 0.1;
-        cameraPosY = 0.0;
-        cameraPosZ = 0.0;
-        cameraCenterX = 0.0;
+        cameraPosX = 0.1f;
+        cameraPosY = 0.1f;
+        cameraPosZ = 0.1f;
+        cameraCenterX = 0.1;
         cameraCenterY = 0.0;
         cameraCenterZ = 0.0;
-        cameraUpX = 0.0;
-        cameraUpY = -1.0;
-        cameraUpZ = -0.0;
-        cameraRotateX = 0.0;
-        cameraRotateY = 1.0;
+        cameraUpX = 1.0;
+        cameraUpY = 1.5;
+        cameraUpZ = -1.0;
+        cameraRotateX = 1.0;
+        cameraRotateY = -0.1;
         cameraRotateZ = 0.0;
         break;
     case 5:  // 무작위 시점
-        cameraAngleX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraAngleY = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraDistance = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 1.9f + 0.1f;
+        cameraPosX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
+        cameraPosY = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
+        cameraPosZ = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 1.9f + 0.1f;
+        cameraCenterX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
+        cameraCenterY = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
+        cameraCenterZ = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
+        cameraUpX = 0.0;
+        cameraUpY = 0.0;
+        cameraUpZ = 0.0;
+
         break;
     }
     glutPostRedisplay();
@@ -313,6 +330,7 @@ int main(int argc, char** argv) {
     glutReshapeFunc(Reshape);
     glutTimerFunc(40, Timer, 1);
     glutSpecialFunc(SpecialFunc);
+    glutKeyboardFunc(KeyBoardFunc);
 
     int menu = glutCreateMenu(Menu);
     glutAddMenuEntry("기본 시점", 1);
@@ -325,3 +343,5 @@ int main(int argc, char** argv) {
     glutMainLoop();
     return 0;
 }
+
+
