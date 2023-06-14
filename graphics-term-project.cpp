@@ -103,7 +103,8 @@ void drawScene() {
     glLoadIdentity();
 
     // 카메라 위치 설정
-    gluLookAt(0.1f, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
+    gluLookAt(0.1f, 0.1f, cameraDistance, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
+    glRotatef(cameraAngle, 0.0f, 1.0f, 0.0f);
 
     // 시점 변경
     if (currentView == 1) {
@@ -183,12 +184,14 @@ void mouse(int button, int state, int x, int y) {
 void specialKeyboard(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_UP:
-        printf("줌인");
-        cameraDistance -= 0.1f;
+        printf("전체 화면 줌인\n");
+        glMatrixMode(GL_PROJECTION);
+        glScaled(1.1, 1.1, 1.1);  // 화면을 0.9배로 축소하여 줌인 효과
         break;
     case GLUT_KEY_DOWN:
-        printf("줌아웃");
-        cameraDistance += 0.1f;
+        printf("전체 화면 줌아웃\n");
+        glMatrixMode(GL_PROJECTION);
+        glScaled(0.9, 0.9, 0.9);  // 화면을 1.1배로 확대하여 줌아웃 효과
         break;
     case GLUT_KEY_LEFT:
         printf("왼쪽회전");
