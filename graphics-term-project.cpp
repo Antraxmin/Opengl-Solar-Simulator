@@ -5,16 +5,29 @@
 #include <stdio.h>
 using namespace std;
 
-static int Time = 0, mer = 0, ven = 0, ear = 0, mar = 0, jup = 0, sat = 0, ura = 0, nep = 0;
+static int Time = 0;        // 자전 변수 
+static int mer = 0, ven = 0, ear = 0, mar = 0, jup = 0, sat = 0, ura = 0, nep = 0;     // 행성 공전 변수
 static GLfloat cameraAngleX = 0.0f;
 static GLfloat cameraAngleY = 0.0f;
 static GLfloat cameraAngleZ = 0.0f;
 static GLfloat cameraDistance = 0.1f;
 GLfloat zoomFactor = 0.9f;  // 확대/축소 비율 조절
 
-GLfloat cameraPosX = 0.1f;
-GLfloat cameraPosY = 0.1f;
-GLfloat cameraPosZ = 0.1f;
+// 카메라 위치 좌표
+GLfloat cameraPosX = 0.1f;             
+GLfloat cameraPosY = 0.1f;             
+GLfloat cameraPosZ = 0.1f;            
+
+// 카메라 초점 좌표
+GLfloat cameraCenterX = 0.1;           
+GLfloat cameraCenterY = 0.0;           
+GLfloat cameraCenterZ = 0.0;    
+
+// 카메라 기울임 좌표
+GLfloat cameraUpX = 1.0;
+GLfloat cameraUpY = 1.5;
+GLfloat cameraUpZ = 0.0;
+
 
 // 공전 궤도 그리기
 void DrawOrbit(float a, float b) {
@@ -36,7 +49,7 @@ void Display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
+    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ);
 
     DrawOrbit(0.3f, 0.3f);      // 수성의 공전 궤도
     DrawOrbit(0.38f, 0.38f);      // 금성의 공전 궤도
@@ -50,7 +63,7 @@ void Display() {
 
     // 태양 
     glColor3f(1.0, 0.3, 0.3);
-    glutWireSphere(0.2, 30, 30);
+    glutWireSphere(0.2, 20, 20);
     
     // 지구
     glPushMatrix();
@@ -81,11 +94,9 @@ void Display() {
     glutWireSphere(0.02, 10, 8);
     glPopMatrix();
 
-    // 금성 - 금색
-    //glLoadIdentity();
+    // 금성 
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
-    //gluLookAt(0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
     glRotatef((GLfloat)ven, 0.0, 0.0, 1.0);
     glTranslatef(0.38, 0.0, 0.0);
     glColor3f(0.9, 0.8, 0.1);
@@ -119,7 +130,6 @@ void Display() {
     glutWireSphere(0.08, 10, 8);
     glPopMatrix();
 
-
     // 천왕성  
     glPushMatrix();
     gluLookAt(cameraPosX, cameraPosY, cameraPosZ, 0.1, 0.0, 0.0, 1.0, 1.5, 0.0);
@@ -149,8 +159,8 @@ void Reshape(int NewWidth, int NewHeight) {
     GLfloat AspectRatio = (GLfloat)NewWidth / (GLfloat)NewHeight;
     printf("%lf", AspectRatio);
     gluPerspective(60.0f, AspectRatio, 0.1f, 10.0f);
-    GLfloat WidthFactor = (GLfloat)NewWidth / (GLfloat)800;
-    GLfloat HeightFactor = (GLfloat)NewHeight / (GLfloat)800;
+    GLfloat WidthFactor = (GLfloat)NewWidth / (GLfloat)500;
+    GLfloat HeightFactor = (GLfloat)NewHeight / (GLfloat)500;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-1.0 * WidthFactor, 1.0 * WidthFactor,
@@ -161,19 +171,14 @@ void Reshape(int NewWidth, int NewHeight) {
 void SpecialFunc(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_UP:  // 위쪽 화살표 키를 눌렀을 때
-        glMatrixMode(GL_PROJECTION);
+       glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         zoomFactor -= 0.02f;
         glOrtho(-1.0 * zoomFactor, 1.0 * zoomFactor,
             -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
-        //cameraDistance -= 0.02f;
-        //if (cameraDistance < 0.01f)
-        //    cameraDistance = 0.01f;
+        glScalef(1.0, 1.0, 1.0);
         break;
     case GLUT_KEY_DOWN:  // 아래쪽 화살표 키를 눌렀을 때
-        //cameraDistance += 0.01f;
-        //if (cameraDistance > 2.0f)
-        //    cameraDistance = 2.0f;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         zoomFactor += 0.02f;
@@ -181,10 +186,10 @@ void SpecialFunc(int key, int x, int y) {
             -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
         break;
     case GLUT_KEY_LEFT:  // 왼쪽 화살표 키를 눌렀을 때
-        cameraPosY -= 0.1f;
+        cameraPosY += 0.1f;
         break;
     case GLUT_KEY_RIGHT:  // 오른쪽 화살표 키를 눌렀을 때
-        cameraPosY += 0.1f;
+        cameraPosY -= 0.1f;
         break;
     }
     glutPostRedisplay();
@@ -198,9 +203,7 @@ void Menu(int value) {
         cameraDistance = 0.1f;
         break;
     case 2:  // 위 시점
-        cameraAngleX = 0.0f;
-        cameraAngleY = 90.0f;
-        cameraDistance = 0.1f;
+        cameraPosY = 0.0;
         break;
     case 3:  // 옆 시점
         cameraAngleX = 90.0f;
@@ -208,9 +211,9 @@ void Menu(int value) {
         cameraDistance = 0.1f;
         break;
     case 4:  // 앞 시점
-        cameraAngleX = 180.0f;
-        cameraAngleY = 0.0f;
-        cameraDistance = 0.1f;
+        cameraPosX = 0;
+        cameraPosY = 1;
+        cameraPosZ = 0;
         break;
     case 5:  // 무작위 시점
         cameraAngleX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
@@ -240,7 +243,7 @@ int main(int argc, char** argv) {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 800);
+    glutInitWindowSize(500, 500);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("20214033 임채민 - 컴퓨터그래픽스 텀프로젝트");
 
