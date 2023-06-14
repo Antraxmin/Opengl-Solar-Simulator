@@ -1,347 +1,240 @@
-﻿
+﻿#include <GL/glut.h>  // OpenGL 라이브러리 헤더 파일
+#include <vector>     // 벡터 컨테이너를 사용하기 위한 헤더 파일
+#include <random>     // 난수 생성을 위한 헤더 파일
 
-#include <GL/glut.h>
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
-#include <stdio.h>
-using namespace std;
+// 행성 구조체 정의
+struct Planet {
+    GLfloat radius;         // 반지름 
+    GLfloat distance;       // 태양으로부터의 거리 
+    GLfloat rotation;       // 공전 각도 변수)
+    GLfloat speed;          // 공전 속도
+    GLfloat color[3];       // 색상 -RGB
+    bool isRotating;
+};
 
-static int Time = 0;        // 자전 변수 
-static int mer = 0, ven = 0, ear = 0, mar = 0, jup = 0, sat = 0, ura = 0, nep = 0;     // 행성 공전 변수
-static GLfloat cameraAngleX = 0.0f;
-static GLfloat cameraAngleY = 0.0f;
-static GLfloat cameraAngleZ = 0.0f;
-static GLfloat cameraDistance = 0.1f;
-GLfloat zoomFactor = 0.9f;  // 확대/축소 비율 조절
+std::vector<Planet> planets;  // Planet 구조체를 담는 벡터
+bool isRotationPaused = false;  // 회전 일시 정지 상태를 나타내는 변수
 
-// 카메라 위치 좌표
-GLfloat cameraPosX = 0.1f;             
-GLfloat cameraPosY = 0.1f;             
-GLfloat cameraPosZ = 0.1f;            
+int currentView = 0;  // 현재 시점을 나타내는 변수 (0: 기본 시점, 1: 위 시점, 2: 옆 시점, 3: 앞 시점, 4: 무작위 시점)
+GLfloat cameraDistance = 0.1f;  // 카메라의 초기 거리
+GLfloat cameraAngle = 0.0f;  // 카메라의 초기 각도
+GLfloat cameraHeight = 1.5f;  // 카메라의 초기 높이
 
-// 카메라 초점 좌표
-GLfloat cameraCenterX = 0.1;           
-GLfloat cameraCenterY = 0.0;           
-GLfloat cameraCenterZ = 0.0;    
+GLfloat globalSpeed = 1.0f;  // 전체 속도 비율
 
-// 카메라 기울임 좌표
-GLfloat cameraUpX = 1.0;
-GLfloat cameraUpY = 1.5;
-GLfloat cameraUpZ = 0.0;
+// 난수 생성기 초기화
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<GLfloat> dis(0.0f, 1.0f);
 
-GLfloat zoom = 1.0f;
-GLfloat cameraRotate = 0.0f;
-GLfloat cameraRotateX = 0.0f;
-GLfloat cameraRotateY = 0.0f;
-GLfloat cameraRotateZ = 0.0f;
+void initializePlanets() {
+    Planet sun = { 0.2f, 0.0f, 0.0f, 0.0f, {1.0f, 1.0f, 0.0f}, true };          // 태양
+    Planet mercury = { 0.02f, 0.3f, 0.0f, 0.25f, {0.7f, 0.7f, 0.7f}, true };    // 수성
+    Planet venus = { 0.05f, 0.35f, 0.0f, 0.6f, {0.8f, 0.5f, 0.2f}, true };      // 금성
+    Planet earth = { 0.05f, 0.4f, 0.0f, 1.0f, {0.2f, 0.4f, 0.8f}, true };       // 지구
+    Planet moon = { 0.012f, 0.45f, 0.0f, 0.07f, {0.7f, 0.7f, 0.7f}, true };      // 달
+    Planet mars = { 0.025f, 0.6f, 0.0f, 1.9f, {0.8f, 0.3f, 0.1f}, true };        // 화성
+    Planet jupiter = { 0.10f, 0.7f, 0.0f, 0.5f, {0.8f, 0.3f, 0.1f}, true };      // 목성
+    Planet saturnus = { 0.08f, 0.8f, 0.0f, 0.4f, {0.8f, 0.3f, 0.1f}, true };      // 토성
+    Planet uranus = { 0.06f, 0.9f, 0.0f, 0.3f, {0.8f, 0.3f, 0.1f}, true };        // 천왕성
+    Planet neptunus = { 0.05f, 1.0f, 0.0f, 0.2f, {0.0f, 0.4f, 0.9f}, true };      // 해왕성
 
-bool isStopped = false;
+    planets.push_back(sun);
+    planets.push_back(moon);
+    planets.push_back(mercury);
+    planets.push_back(venus);
+    planets.push_back(earth);
+    planets.push_back(mars);
+    planets.push_back(jupiter);
+    planets.push_back(saturnus);
+    planets.push_back(uranus);
+    planets.push_back(neptunus);
+}
 
 
-// 공전 궤도 그리기
-void DrawOrbit(float a, float b) {
-    glColor3f(0.5f, 0.5f, 0.5f);
+void drawOrbit(GLfloat orbitRadius, GLfloat lineWidth) {
+    const int numSegments = 360;
+
+    glPushMatrix();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    glTranslatef(0.0f, -orbitRadius, 0.0f);
+    glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+    glLineWidth(lineWidth);
     glBegin(GL_LINE_LOOP);
-    float x, y;
-    for (int i = 0; i <= 360; i += 5) {
-        float angle = i * 3.14159f / 180;
-        x = a * cos(angle);
-        y = b * sin(angle);
+    for (int i = 0; i < numSegments; ++i) {
+        GLfloat theta = 2.0f * 3.14159f * static_cast<GLfloat>(i) / static_cast<GLfloat>(numSegments);
+        GLfloat x = orbitRadius * cosf(theta);
+        GLfloat y = orbitRadius * sinf(theta);
         glVertex3f(x, y, 0.0f);
+    }
+    glEnd();
+    glPopMatrix();
+}
+
+void drawPlanet(Planet planet) {
+    glColor3fv(planet.color);
+    glPushMatrix();
+    glRotatef(planet.rotation, 0.0f, 1.0f, 0.0f);
+    glTranslatef(planet.distance, 0.0f, 0.0f);
+    glutWireSphere(planet.radius, 20, 20);
+    glPopMatrix();
+
+    // 궤도 그리기
+    const GLfloat orbitRadius = planet.distance;
+    const GLfloat orbitLineWidth = 0.002f;
+    const int numSegments = 360;
+
+    glColor3fv(planet.color);
+    glLineWidth(orbitLineWidth);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < numSegments; ++i) {
+        GLfloat theta = 2.0f * 3.14159f * static_cast<GLfloat>(i) / static_cast<GLfloat>(numSegments);
+        GLfloat x = orbitRadius * cosf(theta);
+        GLfloat z = orbitRadius * sinf(theta);
+        glVertex3f(x, 0.0f, z);
     }
     glEnd();
 }
 
-void Display() {
-    glEnable(GL_DEPTH_TEST);        // 은면제거
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+void drawScene() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ);
-    glScalef(zoom, zoom, zoom);
-    glRotatef(cameraRotate, cameraRotateX, cameraRotateY, cameraRotateZ);
-  
-    // 태양 
-    glPushMatrix();
-    glColor3f(1.0, 0.3, 0.3);
-    glutWireSphere(0.2, 20, 20);
-    glPushMatrix();
-    //glPopMatrix();
-    
+    // 카메라 위치 설정
+    gluLookAt(0.1f, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);
 
-    //glPushMatrix();
+    // 시점 변경
+    if (currentView == 1) {
+        gluLookAt(0.1f, 0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 1.5f, 0.0f);  // 위 시점
+    }
+    else if (currentView == 2) {
+        gluLookAt(0.0f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);  // 옆 시점
+    }
+    else if (currentView == 3) {
+        gluLookAt(0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);  // 앞 시점
+    }
+    else if (currentView == 4) {
+        GLfloat randomX = dis(gen) - 0.5f;
+        GLfloat randomY = dis(gen) - 0.5f;
+        GLfloat randomZ = dis(gen) - 0.5f;
+        gluLookAt(randomX, randomY, randomZ, 0.1f, 0.0f, 0.0f, 1.0f, 1.5f, 0.0f);  // 무작위 시점
+    }
 
-    //glLoadIdentity();
-    DrawOrbit(0.3f, 0.3f);      // 수성의 공전 궤도
-    DrawOrbit(0.38f, 0.38f);      // 금성의 공전 궤도
-    DrawOrbit(0.45f, 0.45f);      // 지구의 공전 궤도
-    DrawOrbit(0.53f, 0.53f);      // 화성의 공전 궤도
-    DrawOrbit(0.67f, 0.67f);      // 목성의 공전 궤도
-    DrawOrbit(0.8f, 0.8f);      // 토성의 공전 궤도
-    DrawOrbit(0.9f, 0.9f);      // 천왕성의 공전 궤도
-    DrawOrbit(1.0f, 1.0f);      // 해왕성의 공전 궤도
-    //glPopMatrix();
-
-   
-    
-    // 지구
-    glPushMatrix();
-    glRotatef((GLfloat)ear, 0.0, 0.0, 1.0);
-    glTranslatef(0.45, 0.0, 0.0);
-    glColor3f(0.2, 0.7, 0.8);
-    glutWireSphere(0.05, 20, 20);
-    glPopMatrix();
-
-    // 지구 궤도
-    //DrawOrbit(0.0f, 0.5f);        // 행성을 중심으로 하는 궤도임
-
-    // 달
-    glPushMatrix();
-    glTranslatef(0.08, 0.0, 0.0);
-    glRotatef((GLfloat)Time, 0.0, 0.0, 1.0);
-    glColor3f(0.9, 0.8, 1.0);
-    glutWireSphere(0.012, 10, 10);
-    glPopMatrix();
-
- 
-    // 수성 - 흰색
-    //glLoadIdentity();
-    glPushMatrix();
-    glRotatef((GLfloat)mer, 0.0, 0.0, 1.0);     // Y축을 기준으로 회전
-    glTranslatef(0.3f, 0.0, 0.0);
-    glColor3f(1.0, 1.0, 1.0);
-    glutWireSphere(0.02, 10, 8);
-    glPopMatrix();
-
-    
-
-    // 금성 
-    glPushMatrix();
-    glRotatef((GLfloat)ven, 0.0, 0.0, 1.0);
-    glTranslatef(0.38, 0.0, 0.0);
-    glColor3f(0.9, 0.8, 0.1);
-    glutWireSphere(0.05, 10, 8);
-    glPopMatrix();
-
-    // 화성
-    glPushMatrix();
-    glRotatef((GLfloat)mar, 0.0, 0.0, 1.0);
-    glTranslatef(0.53, 0.0, 0.0);
-    glColor3f(0.9, 0.1, 0.1);
-    glutWireSphere(0.025, 10, 8);
-    glPopMatrix();
-
-
-    // 목성 - 노랑색 
-    glPushMatrix();
-    glRotatef((GLfloat)jup, 0.0, 0.0, 1.0);
-    glTranslatef(0.67, 0.0, 0.0);
-    glColor3f(0.9, 0.8, 0.1);
-    glutWireSphere(0.1, 10, 8);
-    glPopMatrix();
-
-    // 토성  
-    glPushMatrix();
-    glRotatef((GLfloat)sat, 0.0, 0.0, 1.0);
-    glTranslatef(0.8, 0.0, 0.0);
-    glColor3f(0.7, 0.8, 0.1);
-    glutWireSphere(0.08, 10, 8);
-    glPopMatrix();
-
-
-    // 천왕성  
-    glPushMatrix();
-    glRotatef((GLfloat)ura, 0.0, 0.0, 1.0);
-    glTranslatef(0.9, 0.0, 0.0);
-    glColor3f(0.7, 0.8, 0.1);
-    glutWireSphere(0.07, 10, 8);
-    glPopMatrix();
- 
-
-    // 해왕성  
-    glPushMatrix();
-    glRotatef((GLfloat)nep, 0.0, 0.0, 1.0);
-    glTranslatef(1.0, 0.0, 0.0);
-    glColor3f(0.7, 0.8, 0.1);
-    glutWireSphere(0.06, 10, 8);
-    glPopMatrix();
-
-    glPopMatrix();
+    // 행성 그리기
+    for (const auto& planet : planets) {
+        drawPlanet(planet);
+    }
 
     glutSwapBuffers();
 }
 
-void Reshape(int width, int height) {
+void updateScene(int value) {
+    if (!isRotationPaused) {
+        // 행성 회전 및 공전
+        for (auto& planet : planets) {
+            planet.rotation += planet.speed * globalSpeed;
+            planet.rotation = fmodf(planet.rotation, 360.0f);
+        }
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, updateScene, 0);  // 60 FPS
+}
+
+void reshape(int width, int height) {
     glViewport(0, 0, width, height);
+
     glMatrixMode(GL_PROJECTION);
-    GLfloat AspectRatio = (GLfloat)width / (GLfloat)height;
-    gluPerspective(90.0f, AspectRatio, 0.1f, 10.0f);
+    gluPerspective(60.0, (GLfloat)width / (GLfloat)height, 0.5, 100.0);
     glLoadIdentity();
 }
 
-void KeyBoardFunc(unsigned char key, int x, int y) {
-    if (key == 32) {
-        isStopped = !isStopped;
-    }
-}
-
-
-void SpecialFunc(int key, int x, int y) {
+void keyboard(unsigned char key, int x, int y) {
     switch (key) {
-    case GLUT_KEY_UP:  // 위쪽 화살표 키를 눌렀을 때
-       glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        zoomFactor -= 0.02f;
-        glOrtho(-1.0 * zoomFactor, 1.0 * zoomFactor,
-            -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
-        //zoom *= 1.1f;
+    case 32:
+        isRotationPaused = !isRotationPaused;
+    case '+':
+        globalSpeed += 0.1f;
+        printf("속도 1 증가");
+
+    case '-':
+        globalSpeed -= 0.1f;
+        if (globalSpeed < 0.1f) {
+            globalSpeed = 0.1f;
+        }
+        printf("속도 1 감소");
+    }
+    glutPostRedisplay();
+}
+
+void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        // 행성 색상 무작위 변경
+        for (auto& planet : planets) {
+            planet.color[0] = dis(gen);
+            planet.color[1] = dis(gen);
+            planet.color[2] = dis(gen);
+        }
+    }
+}
+
+void specialKeyboard(int key, int x, int y) {
+    switch (key) {
+    case GLUT_KEY_UP:
+        printf("줌인");
+        cameraDistance -= 0.1f;
         break;
-    case GLUT_KEY_DOWN:  // 아래쪽 화살표 키를 눌렀을 때
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        zoomFactor += 0.02f;
-        glOrtho(-1.0 * zoomFactor, 1.0 * zoomFactor,
-            -1.0 * zoomFactor, 1.0 * zoomFactor, -1.0, 1.0);
+    case GLUT_KEY_DOWN:
+        printf("줌아웃");
+        cameraDistance += 0.1f;
         break;
-    case GLUT_KEY_LEFT:  // 왼쪽 화살표 키를 눌렀을 때
-        cameraPosX -= 0.1f;
+    case GLUT_KEY_LEFT:
+        printf("왼쪽회전");
+        cameraAngle -= 1.0f;
         break;
-    case GLUT_KEY_RIGHT:  // 오른쪽 화살표 키를 눌렀을 때
-        cameraPosX += 0.1f;
+    case GLUT_KEY_RIGHT:
+        printf("오른쪽회전");
+        cameraAngle += 1.0f;
         break;
     }
     glutPostRedisplay();
 }
 
-
-void Menu(int value) {
-    switch (value) {
-    case 1:  // 기본 시점
-        zoom = 1;
-        cameraRotate = 0.0f;
-        cameraPosX = 0.1;
-        cameraPosY = 0.1;
-        cameraPosZ = 0.1;
-        cameraCenterX = 0.1;
-        cameraCenterY = 0.0;
-        cameraCenterZ = 0.0;
-        cameraUpX = 1.0;
-        cameraUpY = 1.5;
-        cameraUpZ = 0.0;
-        cameraRotateX = 0.0;
-        cameraRotateY = 1.0;
-        cameraRotateZ = -1.0;
-        break;
-    case 4:  // 옆 시점
-        zoom = 1;
-        cameraRotate = 0.0f;
-        cameraPosX = 0.1;
-        cameraPosY = 0.0;
-        cameraPosZ = 0.0;
-        cameraCenterX = 0.0;
-        cameraCenterY = 0.0;
-        cameraCenterZ = 0.0;
-        cameraUpX = 0.0;
-        cameraUpY = 0.0;
-        cameraUpZ = -1.0;
-        cameraRotateX = -1.0;
-        cameraRotateY = 0.0;
-        cameraRotateZ = 0.0;
-        break;
-    case 2:  // 앞 시점
-        zoom = 1;
-        cameraRotate = 0.0f;
-        cameraPosX = 0.0;
-        cameraPosY = 0.1;
-        cameraPosZ = 0.1;
-        cameraCenterX = 0.0;
-        cameraCenterY = 0.0;
-        cameraCenterZ = 0.0;
-        cameraUpX = 0.0;
-        cameraUpY = -1.0;
-        cameraUpZ = 0.0;
-        cameraRotateX = 0.0;
-        cameraRotateY = 1.0;
-        cameraRotateZ = 0.0;
-        break;
-    case 3:  // 위 시점
-        zoom = 1;
-        cameraRotate = 0.0f;
-        cameraPosX = 0.1f;
-        cameraPosY = 0.1f;
-        cameraPosZ = 0.1f;
-        cameraCenterX = 0.1;
-        cameraCenterY = 0.0;
-        cameraCenterZ = 0.0;
-        cameraUpX = 1.0;
-        cameraUpY = 1.5;
-        cameraUpZ = -1.0;
-        cameraRotateX = 1.0;
-        cameraRotateY = -0.1;
-        cameraRotateZ = 0.0;
-        break;
-    case 5:  // 무작위 시점
-        cameraPosX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraPosY = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraPosZ = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 1.9f + 0.1f;
-        cameraCenterX = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraCenterY = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraCenterZ = static_cast<GLfloat>(rand()) / static_cast<GLfloat>(RAND_MAX) * 360.0f;
-        cameraUpX = 0.0;
-        cameraUpY = 0.0;
-        cameraUpZ = 0.0;
-
-        break;
-    }
+void menuSelect(int choice) {
+    currentView = choice;
     glutPostRedisplay();
 }
 
-void Timer(int Value) {
-    mer = fmodf(mer + 1, 360);      // 수성의 공전 속도
-    ven = fmodf(ven + 1.8, 360);      // 금성의 공전 속도 
-    ear = fmodf(ear + 3, 360);      // 지구의 공전 속도
-    mar = fmodf(mar + 5.7, 360);      // 화성의 공전 속도 
-    jup = fmodf(jup + 2.5, 360);      // 목성의 공전 속도 
-    sat = fmodf(sat + 2, 360);      // 토성의 공전 속도 
-    ura = fmodf(ura + 1.5, 360);      // 천왕성의 공전 속도 
-    nep = fmodf(nep + 1.1, 360);      // 해왕성의 공전 속도 
-    Time = (Time + 3) % 360;        // 자전 속도
-    glutPostRedisplay();
-    glutTimerFunc(40, Timer, 1);
+void createMenu() {
+    int menu = glutCreateMenu(menuSelect);
+    glutAddMenuEntry("기본 시점", 0);
+    glutAddMenuEntry("위 시점", 1);
+    glutAddMenuEntry("옆 시점", 2);
+    glutAddMenuEntry("앞 시점", 3);
+    glutAddMenuEntry("무작위 시점", 4);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 int main(int argc, char** argv) {
-    srand(static_cast<unsigned int>(time(0)));  // 난수 초기화
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(500, 500);
-    glutInitWindowPosition(0, 0);
-    glutCreateWindow("20214033 임채민 - 컴퓨터그래픽스 텀프로젝트");
+    glutInitWindowSize(600, 600);
+    glutCreateWindow("OpenGL Solar System");
 
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+    initializePlanets();
 
-    glutDisplayFunc(Display);
-    glutReshapeFunc(Reshape);
-    glutTimerFunc(40, Timer, 1);
-    glutSpecialFunc(SpecialFunc);
-    glutKeyboardFunc(KeyBoardFunc);
+    glutDisplayFunc(drawScene);
+    glutReshapeFunc(reshape);
+    glutSpecialFunc(specialKeyboard);
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    createMenu();
 
-    int menu = glutCreateMenu(Menu);
-    glutAddMenuEntry("기본 시점", 1);
-    glutAddMenuEntry("위 시점", 2);
-    glutAddMenuEntry("옆 시점", 3);
-    glutAddMenuEntry("앞 시점", 4);
-    glutAddMenuEntry("무작위 시점", 5);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutTimerFunc(16, updateScene, 0);  // 60 FPS
 
     glutMainLoop();
+
     return 0;
 }
-
-
